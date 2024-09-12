@@ -1,0 +1,3 @@
+<id,hola, 1, 1>
+<tk_asing, 1, 6>
+<tk_cadena,"hola", 1, 8>
