@@ -1,9 +1,10 @@
-# 2.5598055 while3!=88¬56.a
-imaginario = 2+a3uan
-2 abcd j
-j = holaaa
-2j
-holaquetal3
-123.5 j
-"holaaaa           "
-string = "hola"+"a"
+
+"""
+
+
+
+soy un docstring
+
+
+
+"""

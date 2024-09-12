@@ -45,6 +45,7 @@ character_special = {
     "->": "tk_ejecuta",
     "...": "tk_ellipsis",
     ":=": "tk_dos_puntos_equal",
+    '"""': "tk_docstring"
 }
 # reserved words
 word_reserved = {
@@ -193,6 +194,9 @@ data_types = {
 }
 
 
+DOCSTRING_ACUMULATOR = ["", 1]
+DOCSTRING_ACTIVE = False
+
 class Token:
     def __init__(self, nombre, fila, columna):
         self.nombre = nombre
@@ -238,11 +242,16 @@ def read_file(file_name):
     return lines
 
 
-def scannerFunction(cadena):
+def scannerFunction(cadena, indice_inicial = 1):
+    global DOCSTRING_ACTIVE
+    global DOCSTRING_ACUMULATOR
     textoEscaneado = []
     subcadena_actual = ""
-    indice_inicial = 1  # Inicializar en 1 en lugar de 0
     ignorar = False  # Bandera para indicar si se debe ignorar caracteres
+    if '"""' in cadena:
+        DOCSTRING_ACTIVE = True
+    else:
+        DOCSTRING_ACTIVE = False
     i = 0
     while i < len(cadena):
         if cadena[i] == "\n":
@@ -259,6 +268,15 @@ def scannerFunction(cadena):
             i += 1
             continue
         found_special = False
+        if DOCSTRING_ACTIVE and cadena[i:i+3] == '"""': # Busca donde inicia el docstring
+            end_quote_index = cadena.find('"""', i + 3)
+            if end_quote_index !=-1 : # Si el docstring se cierra en la misma linea
+                textoEscaneado.append([cadena[i : end_quote_index +1], i + 1]) 
+            else: 
+                DOCSTRING_ACTIVE = True
+                DOCSTRING_ACUMULATOR[0] += cadena[i:]
+                DOCSTRING_ACUMULATOR[1] += i
+                return textoEscaneado
         if cadena[i] == '"':
             end_quote_index = cadena.find('"', i + 1)
             if end_quote_index != -1:  # Verificar si se encontró la comilla de cierre
@@ -332,10 +350,26 @@ def scannerFunction(cadena):
 
 
 def generadorTokensSinProcesar(texto):
+    global DOCSTRING_ACUMULATOR
+    global DOCSTRING_ACTIVE
     tokensFinales = []
+    
     for i in range(len(texto)):
-        tokensImperfectos = scannerFunction(texto[i])
-        tokensFinales.append(tokensImperfectos)
+        if DOCSTRING_ACTIVE:
+            end_quote_index = texto[i].find('"""')
+            
+            if end_quote_index != -1: # encuentra el docstring de cierre
+                DOCSTRING_ACTIVE = False
+                DOCSTRING_ACUMULATOR[0] += texto[i][:end_quote_index+3]
+                tokensFinales.append([DOCSTRING_ACUMULATOR])
+                DOCSTRING_ACUMULATOR = ["", 1]
+                tokensImperfectos = scannerFunction(texto[i][end_quote_index + 3:], end_quote_index+3)
+                tokensFinales.append(tokensImperfectos)
+            else:
+                DOCSTRING_ACUMULATOR[0] += texto[i]
+        else:
+            tokensImperfectos = scannerFunction(texto[i])
+            tokensFinales.append(tokensImperfectos)
     return tokensFinales
 
 
@@ -343,7 +377,7 @@ def clasificadorDeTokens(tokensFinales):
     tokenClasificado = []
     for i in range(len(tokensFinales)):
         for j in range(len(tokensFinales[i])):
-
+            print(tokensFinales[i][j][0])
             if tokensFinales[i][j][0] in character_special:
                 objeto = Token(
                     character_special[tokensFinales[i][j][0]],
@@ -383,7 +417,12 @@ def clasificadorDeTokens(tokensFinales):
             ):
                 objeto = Token("tk_float, " + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1])
                 tokenClasificado.append(objeto)
+            elif tokensFinales[i][j][0][:4] == '"""':
+                objeto = Token(
+                    "tk_docstring," + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1]
+                )
             elif tokensFinales[i][j][0][0] == '"' and tokensFinales[i][j][0][-1] == '"':
+                print(tokensFinales[i][j][0][:4])
                 objeto = Token(
                     "tk_cadena," + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1]
                 )
@@ -416,6 +455,7 @@ def clasificadorDeTokens(tokensFinales):
                 )
                 tokenClasificado.append(objeto)
             else:
+                print("Token ",tokensFinales[i][j][0])
                 objeto = Error(
                     tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1]
                 )
@@ -425,9 +465,11 @@ def clasificadorDeTokens(tokensFinales):
 
 
 def main():
-    path = input("Ingrese el nombre del archivo: ")
+    path ="ejemplo_prueba_2.txt" # input("Ingrese el nombre del archivo: ")
     texto = read_file(path)
     tokens = generadorTokensSinProcesar(texto)
+    print(tokens)
+    
     salida = clasificadorDeTokens(tokens)
 
     output_file = "analisis_tokens.txt"
@@ -438,4 +480,6 @@ def main():
 
 
 if __name__ == "__main__":
+    
+    
     main()
