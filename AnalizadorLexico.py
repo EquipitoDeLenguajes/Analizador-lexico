@@ -259,13 +259,13 @@ def scannerFunction(cadena):
             end_quote_index = cadena.find('"', i + 1)
             if end_quote_index != -1:  # Verificar si se encontró la comilla de cierre
                 textoEscaneado.append([cadena[i : end_quote_index + 1], i + 1])
-                i = end_quote_index + 1
+                i = end_quote_index
                 found_special = True
         if cadena[i] == "'":
             end_quote_index = cadena.find("'", i + 1)
             if end_quote_index != -1:  # Verificar si se encontró la comilla de cierre
                 textoEscaneado.append([cadena[i : end_quote_index + 1], i + 1])
-                i = end_quote_index + 1
+                i = end_quote_index
                 found_special = True
         if not found_special:
             if cadena[i].isdigit():
@@ -369,15 +369,15 @@ def clasificadorDeTokens(tokensFinales):
                 )
                 and len(tokensFinales[i][j][0]) > 1
             ):
-                objeto = Token("tk_complejo", i + 1, tokensFinales[i][j][1])
+                objeto = Token("tk_complejo, " + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1])
                 tokenClasificado.append(objeto)
             elif all(caracter.isdigit() for caracter in tokensFinales[i][j][0]):
-                objeto = Token("tk_entero", i + 1, tokensFinales[i][j][1])
+                objeto = Token("tk_entero, " + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1])
                 tokenClasificado.append(objeto)
             elif sum(1 for char in tokensFinales[i][j][0] if char == ".") == 1 and all(
                 char.isdigit() or char == "." for char in tokensFinales[i][j][0]
             ):
-                objeto = Token("tk_float", i + 1, tokensFinales[i][j][1])
+                objeto = Token("tk_float, " + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1])
                 tokenClasificado.append(objeto)
             elif tokensFinales[i][j][0][0] == '"' and tokensFinales[i][j][0][-1] == '"':
                 objeto = Token(
