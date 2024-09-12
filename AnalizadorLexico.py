@@ -435,15 +435,17 @@ def clasificadorDeTokens(tokensFinales):
             elif tokensFinales[i][j][0][0] == '"' and tokensFinales[i][j][0][-1] == '"':
                 cadena = tokensFinales[i][j][0].replace("\n" , '\\n')
                 token = "tk_cadena," if "\\n" not in cadena else "tk_docstring,"
+                fila = i if token == "tk_docstring," else i + 1
                 objeto = Token(
-                    token + cadena, i + 1, tokensFinales[i][j][1]
+                    token + cadena, fila, tokensFinales[i][j][1]
                 )
                 tokenClasificado.append(objeto)
             elif tokensFinales[i][j][0][0] == "'" and tokensFinales[i][j][0][-1] == "'":
                 cadena = tokensFinales[i][j][0].replace("\n" , '\\n')
                 token = "tk_cadena," if "\\n" not in cadena else "tk_docstring,"
+                fila = i if token == "tk_docstring," else i + 1
                 objeto = Token(
-                    token + cadena, i + 1, tokensFinales[i][j][1]
+                    token + cadena, fila, tokensFinales[i][j][1]
                 )
                 tokenClasificado.append(objeto)
             elif tokensFinales[i][j][0].startswith("__") and tokensFinales[i][j][

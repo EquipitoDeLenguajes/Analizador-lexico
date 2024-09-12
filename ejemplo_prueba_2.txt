@@ -3,7 +3,11 @@ imaginario = 2+a3uan
 2 abcd j
 j = holaaa
 2j
-"""""aaa"
+abd123 """
+Como estaaa
+La
+People
+""" abc "hola"
 holaquetal3
 123.5 j
 ""hola3""
