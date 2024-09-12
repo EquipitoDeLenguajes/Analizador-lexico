@@ -9,4 +9,4 @@
 <id,j, 4, 1>
 <tk_assign, 4, 3>
 <id,holaaa, 4, 5>
-<tk_complejo, 5, 1>
+>>>Error léxico (línea: 5, posición: 1, token: 2j8)

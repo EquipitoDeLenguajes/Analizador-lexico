@@ -229,6 +229,8 @@ def read_file(file_name):
     with open(file_name, "r", encoding="UTF-8") as file:
         for line in file:
             lines.append(line)
+        if lines[-1][-1] != "\n":
+            lines[-1] += "\n"
     return lines
 
 
