@@ -1,10 +1,10 @@
-
-"""
-
-
-
-soy un docstring
-
-
-
-"""
+# 2.5598055 while3!=88¬56.a
+imaginario = 2+a3uan
+2 abcd j
+j = holaaa
+2j
+"""""aaa"
+holaquetal3
+123.5 j
+""hola3""
+string = "hola"+"a"
