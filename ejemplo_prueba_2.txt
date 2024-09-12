@@ -8,7 +8,10 @@ Como estaaa
 La
 People
 """ abc "hola"
-holaquetal3
+holaquetal3 '''
+Otro docstring de prueba con
+single quote """ ''' 2654.77+4j uan
 123.5 j
 ""hola3""
 string = "hola"+"a"
+"""""a""" errorSyntactico = True

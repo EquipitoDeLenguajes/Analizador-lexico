@@ -325,7 +325,7 @@ def scannerFunction(cadena, i=0):
                             break
                 if "j" in subcadena_siguiente:
                     subcadena_actual += cadena[i] + subcadena_siguiente
-                    textoEscaneado.append([subcadena_actual, indice_inicial])
+                    textoEscaneado.append([subcadena_actual, k])
                     i += len(subcadena_actual)
                     subcadena_actual = ""
                     found_special = True
@@ -380,7 +380,6 @@ def generadorTokensSinProcesar(texto):
             end_quote_index = texto[i].find('"""')
             if end_quote_index != -1:  # encuentra el docstring de cierre
                 DOCSTRING_MULTI = ""
-                print(end_quote_index)
                 tokensImperfectos = scannerFunction(
                     texto[i], end_quote_index + 3
                 )
