@@ -404,7 +404,7 @@ def clasificadorDeTokens(tokensFinales):
             elif any(
                 caracter.isalpha() or (caracter.isdigit() and not caracter.isalnum())
                 for caracter in tokensFinales[i][j][0]
-            ) and tokensFinales[i][j][0].isalpha():
+            ) and tokensFinales[i][j][0][0].isalpha():
                 objeto = Identifier(
                     tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1]
                 )

@@ -1,1 +1,12 @@
-<tk_complejo, 7, 1>
+<id,imaginario, 2, 1>
+<tk_assign, 2, 12>
+<tk_entero, 2, 14>
+<tk_plus, 2, 15>
+<id,aaaaaaa3uan, 2, 16>
+<tk_entero, 3, 1>
+<id,abcd, 3, 3>
+<id,j, 3, 8>
+<id,j, 4, 1>
+<tk_assign, 4, 3>
+<id,holaaa, 4, 5>
+<tk_complejo, 5, 1>
