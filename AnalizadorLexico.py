@@ -269,7 +269,8 @@ def scannerFunction(cadena):
             if cadena[i].isdigit():
                 k = i
                 subcadena_siguiente = ""
-                while k < len(cadena) - 1 and " " not in subcadena_siguiente:
+                while (k < len(cadena) - 1 and " " not in subcadena_siguiente
+                       and sum(1 for key in character_special if key in subcadena_siguiente) == 0):
                     k += 1
                     if k < len(cadena) - 1:
                         subcadena_siguiente += cadena[k]
@@ -364,6 +365,7 @@ def clasificadorDeTokens(tokensFinales):
                     char.isdigit() or char in (".", "j")
                     for char in tokensFinales[i][j][0]
                 )
+                and len(tokensFinales[i][j][0]) > 1
             ):
                 objeto = Token("tk_complejo", i + 1, tokensFinales[i][j][1])
                 tokenClasificado.append(objeto)
@@ -402,7 +404,7 @@ def clasificadorDeTokens(tokensFinales):
             elif any(
                 caracter.isalpha() or (caracter.isdigit() and not caracter.isalnum())
                 for caracter in tokensFinales[i][j][0]
-            ):
+            ) and tokensFinales[i][j][0].isalpha():
                 objeto = Identifier(
                     tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1]
                 )
