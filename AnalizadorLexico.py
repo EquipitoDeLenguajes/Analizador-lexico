@@ -377,7 +377,6 @@ def clasificadorDeTokens(tokensFinales):
     tokenClasificado = []
     for i in range(len(tokensFinales)):
         for j in range(len(tokensFinales[i])):
-            print(tokensFinales[i][j][0])
             if tokensFinales[i][j][0] in character_special:
                 objeto = Token(
                     character_special[tokensFinales[i][j][0]],
@@ -422,12 +421,14 @@ def clasificadorDeTokens(tokensFinales):
                     "tk_docstring," + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1]
                 )
             elif tokensFinales[i][j][0][0] == '"' and tokensFinales[i][j][0][-1] == '"':
-                print(tokensFinales[i][j][0][:4])
+                
                 objeto = Token(
-                    "tk_cadena," + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1]
+                    "tk_cadena," + tokensFinales[i][j][0].replace("\n" , '\\n'), i + 1, tokensFinales[i][j][1]
                 )
                 tokenClasificado.append(objeto)
             elif tokensFinales[i][j][0][0] == "'" and tokensFinales[i][j][0][-1] == "'":
+
+
                 objeto = Token(
                     "tk_cadena," + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1]
                 )
@@ -455,7 +456,7 @@ def clasificadorDeTokens(tokensFinales):
                 )
                 tokenClasificado.append(objeto)
             else:
-                print("Token ",tokensFinales[i][j][0])
+                
                 objeto = Error(
                     tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1]
                 )
@@ -468,7 +469,7 @@ def main():
     path ="ejemplo_prueba_2.txt" # input("Ingrese el nombre del archivo: ")
     texto = read_file(path)
     tokens = generadorTokensSinProcesar(texto)
-    print(tokens)
+
     
     salida = clasificadorDeTokens(tokens)
 
