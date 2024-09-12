@@ -226,11 +226,15 @@ class Error:
 
 def read_file(file_name):
     lines = []
-    with open(file_name, "r", encoding="UTF-8") as file:
-        for line in file:
-            lines.append(line)
-        if lines[-1][-1] != "\n":
-            lines[-1] += "\n"
+    try:
+        with open(file_name, "r", encoding="UTF-8") as file:
+            for line in file:
+                lines.append(line)
+            if lines[-1][-1] != "\n":
+                lines[-1] += "\n"
+    except Exception:
+        print(f"Error al leer el archivo {file_name}")
+        exit(0)
     return lines
 
 
@@ -421,7 +425,7 @@ def clasificadorDeTokens(tokensFinales):
 
 
 def main():
-    path = "ejemplo_prueba_2.txt"  # input("Ingrese el nombre del archivo: ")
+    path = input("Ingrese el nombre del archivo: ")
     texto = read_file(path)
     tokens = generadorTokensSinProcesar(texto)
     salida = clasificadorDeTokens(tokens)
