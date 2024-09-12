@@ -1,4 +1,5 @@
 import sys
+
 character_special = {
     ")": "tk_par_der",
     "(": "tk_par_izq",
@@ -46,7 +47,6 @@ character_special = {
     "->": "tk_ejecuta",
     "...": "tk_ellipsis",
     ":=": "tk_dos_puntos_equal",
-    
 }
 # reserved words
 word_reserved = {
@@ -194,9 +194,8 @@ data_types = {
     "frozenset": "frozenset",
 }
 
+DOCSTRING_MULTI = ""
 
-DOCSTRING_ACUMULATOR = ["", 1]
-DOCSTRING_ACTIVE = False
 
 class Token:
     def __init__(self, nombre, fila, columna):
@@ -239,23 +238,21 @@ def read_file(file_name):
     return lines
 
 
-def scannerFunction(cadena, indice_inicial = 1):
-    global DOCSTRING_ACTIVE
-    global DOCSTRING_ACUMULATOR
+def scannerFunction(cadena, i=0):
+    global DOCSTRING_MULTI
     textoEscaneado = []
     subcadena_actual = ""
+    indice_inicial = 1  # Inicializar indice_inicial en 1 en lugar de 0
     ignorar = False  # Bandera para indicar si se debe ignorar caracteres
     if '"""' in cadena or "'''" in cadena:
-        DOCSTRING_ACTIVE = True
+        docstring = True
     else:
-        DOCSTRING_ACTIVE = False
-    i = 0
+        docstring = False
     while i < len(cadena):
         if cadena[i] == "\n":
             i += 1
-            ignorar = (
-                False  # Restablecer la bandera cuando se encuentra un salto de línea
-            )
+            # Restablecer la bandera cuando se encuentra un salto de línea
+            ignorar = False
             continue  # Salta al siguiente carácter sin procesar los siguientes pasos
         elif cadena[i] == "#":
             ignorar = True  # Establecer la bandera para ignorar caracteres
@@ -265,24 +262,38 @@ def scannerFunction(cadena, indice_inicial = 1):
             i += 1
             continue
         found_special = False
-        if DOCSTRING_ACTIVE and cadena[i:i+3] == '"""': # Busca donde inicia el docstring
-            end_quote_index = cadena.find('"""', i + 3)
-            if end_quote_index !=-1 : # Si el docstring se cierra en la misma linea
-                textoEscaneado.append([cadena[i : end_quote_index +1], i + 1]) 
-            else: 
-                DOCSTRING_ACTIVE = True
-                DOCSTRING_ACUMULATOR[0] += cadena[i:]
-                DOCSTRING_ACUMULATOR[1] += i
-                return textoEscaneado
-        elif DOCSTRING_ACTIVE and cadena[i:i+3] == "'''": # Busca donde inicia el docstring
-            end_quote_index = cadena.find("'''", i + 3)
-            if end_quote_index !=-1 : # Si el docstring se cierra en la misma linea
-                textoEscaneado.append([cadena[i : end_quote_index +1], i + 1]) 
-            else: 
-                DOCSTRING_ACTIVE = True
-                DOCSTRING_ACUMULATOR[0] += cadena[i:]
-                DOCSTRING_ACUMULATOR[1] += i
-                return textoEscaneado
+        if docstring:
+            # Busca donde inicia el docstring
+            if (cadena[i : i + 3] == '"""' and DOCSTRING_MULTI == ""):
+                end_quote_index = cadena.find('"""', i + 3)
+                if end_quote_index != -1:  # Si el docstring se cierra en la misma linea
+                    i = end_quote_index + 3
+                else:
+                    ignorar = True
+                    DOCSTRING_MULTI = '"""'
+                    continue
+            elif cadena[i : i + 3] == "'''" and DOCSTRING_MULTI == "":
+                end_quote_index = cadena.find("'''", i + 3)
+                if end_quote_index != -1:  # Si el docstring se cierra en la misma linea
+                    i = end_quote_index + 3
+                else:
+                    ignorar = True
+                    DOCSTRING_MULTI = "'''"
+                    continue
+            elif DOCSTRING_MULTI == '"""':
+                end_quote_index = cadena.find('"""', i + 3)
+                if end_quote_index != -1:
+                    i = end_quote_index + 3
+                else:
+                    ignorar = True
+                    continue
+            elif DOCSTRING_MULTI == "'''":
+                end_quote_index = cadena.find("'''", i + 3)
+                if end_quote_index != -1:  # Si el docstring se cierra en la misma linea
+                    i = end_quote_index + 3
+                else:
+                    ignorar = True
+                    continue
         if cadena[i] == '"':
             end_quote_index = cadena.find('"', i + 1)
             if end_quote_index != -1:  # Verificar si se encontró la comilla de cierre
@@ -299,12 +310,18 @@ def scannerFunction(cadena, indice_inicial = 1):
             if cadena[i].isdigit():
                 k = i
                 subcadena_siguiente = ""
-                while (k < len(cadena) - 1 and " " not in subcadena_siguiente
-                       and sum(1 for key in character_special if key in subcadena_siguiente) == 0):
+                while (
+                    k < len(cadena) - 1
+                    and " " not in subcadena_siguiente
+                    and sum(
+                        1 for key in character_special if key in subcadena_siguiente
+                    )
+                    == 0
+                ):
                     k += 1
                     if k < len(cadena) - 1:
                         subcadena_siguiente += cadena[k]
-                        if cadena[k] == 'j' and cadena[k + 1] == " ":
+                        if cadena[k] == "j" and cadena[k + 1] == " ":
                             break
                 if "j" in subcadena_siguiente:
                     subcadena_actual += cadena[i] + subcadena_siguiente
@@ -356,33 +373,32 @@ def scannerFunction(cadena, indice_inicial = 1):
 
 
 def generadorTokensSinProcesar(texto):
-    global DOCSTRING_ACUMULATOR
-    global DOCSTRING_ACTIVE
+    global DOCSTRING_MULTI
     tokensFinales = []
-    
     for i in range(len(texto)):
-        if DOCSTRING_ACTIVE:
+        if DOCSTRING_MULTI == '"""':
             end_quote_index = texto[i].find('"""')
-            if end_quote_index != -1: # encuentra el docstring de cierre
-                DOCSTRING_ACTIVE = False
-                DOCSTRING_ACUMULATOR[0] += texto[i][:end_quote_index+3]
-                tokensFinales.append([DOCSTRING_ACUMULATOR])
-                DOCSTRING_ACUMULATOR = ["", 1]
-                tokensImperfectos = scannerFunction(texto[i][end_quote_index + 3:], end_quote_index+3)
+            if end_quote_index != -1:  # encuentra el docstring de cierre
+                DOCSTRING_MULTI = ""
+                print(end_quote_index)
+                tokensImperfectos = scannerFunction(
+                    texto[i], end_quote_index + 3
+                )
                 tokensFinales.append(tokensImperfectos)
             else:
-                DOCSTRING_ACUMULATOR[0] += texto[i]
-            if DOCSTRING_ACTIVE:
-                end_quote_index = texto[i].find("'''")
-                if end_quote_index != -1: # encuentra el docstring de cierre
-                    DOCSTRING_ACTIVE = False
-                    DOCSTRING_ACUMULATOR[0] += texto[i][:end_quote_index+3]
-                    tokensFinales.append([DOCSTRING_ACUMULATOR])
-                    DOCSTRING_ACUMULATOR = ["", 1]
-                    tokensImperfectos = scannerFunction(texto[i][end_quote_index + 3:], end_quote_index+3)
-                    tokensFinales.append(tokensImperfectos)
-                else:
-                    DOCSTRING_ACUMULATOR[0] += texto[i]
+                tokensFinales.append([])
+                continue
+        elif DOCSTRING_MULTI == "'''":
+            end_quote_index = texto[i].find("'''")
+            if end_quote_index != -1:  # encuentra el docstring de cierre
+                DOCSTRING_MULTI = ""
+                tokensImperfectos = scannerFunction(
+                    texto[i], end_quote_index + 3
+                )
+                tokensFinales.append(tokensImperfectos)
+            else:
+                tokensFinales.append([])
+                continue
         else:
             tokensImperfectos = scannerFunction(texto[i])
             tokensFinales.append(tokensImperfectos)
@@ -422,30 +438,34 @@ def clasificadorDeTokens(tokensFinales):
                 )
                 and len(tokensFinales[i][j][0]) > 1
             ):
-                objeto = Token("tk_complejo, " + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1])
+                objeto = Token(
+                    "tk_complejo, " + tokensFinales[i][j][0],
+                    i + 1,
+                    tokensFinales[i][j][1],
+                )
                 tokenClasificado.append(objeto)
             elif all(caracter.isdigit() for caracter in tokensFinales[i][j][0]):
-                objeto = Token("tk_entero, " + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1])
+                objeto = Token(
+                    "tk_entero, " + tokensFinales[i][j][0],
+                    i + 1,
+                    tokensFinales[i][j][1],
+                )
                 tokenClasificado.append(objeto)
             elif sum(1 for char in tokensFinales[i][j][0] if char == ".") == 1 and all(
                 char.isdigit() or char == "." for char in tokensFinales[i][j][0]
             ):
-                objeto = Token("tk_float, " + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1])
+                objeto = Token(
+                    "tk_float, " + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1]
+                )
                 tokenClasificado.append(objeto)
             elif tokensFinales[i][j][0][0] == '"' and tokensFinales[i][j][0][-1] == '"':
-                cadena = tokensFinales[i][j][0].replace("\n" , '\\n')
-                token = "tk_cadena," if "\\n" not in cadena else "tk_docstring,"
-                fila = i if token == "tk_docstring," else i + 1
                 objeto = Token(
-                    token + cadena, fila, tokensFinales[i][j][1]
+                    "tk_cadena," + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1]
                 )
                 tokenClasificado.append(objeto)
             elif tokensFinales[i][j][0][0] == "'" and tokensFinales[i][j][0][-1] == "'":
-                cadena = tokensFinales[i][j][0].replace("\n" , '\\n')
-                token = "tk_cadena," if "\\n" not in cadena else "tk_docstring,"
-                fila = i if token == "tk_docstring," else i + 1
                 objeto = Token(
-                    token + cadena, fila, tokensFinales[i][j][1]
+                    "tk_cadena," + tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1]
                 )
                 tokenClasificado.append(objeto)
             elif tokensFinales[i][j][0].startswith("__") and tokensFinales[i][j][
@@ -462,19 +482,20 @@ def clasificadorDeTokens(tokensFinales):
                     methods[tokensFinales[i][j][0]], i + 1, tokensFinales[i][j][1]
                 )
                 tokenClasificado.append(objeto)
-            elif any(
-                caracter.isalpha() or (caracter.isdigit() and not caracter.isalnum())
-                for caracter in tokensFinales[i][j][0]
-            ) and tokensFinales[i][j][0][0].isalpha():
+            elif (
+                any(
+                    caracter.isalpha()
+                    or (caracter.isdigit() and not caracter.isalnum())
+                    for caracter in tokensFinales[i][j][0]
+                )
+                and tokensFinales[i][j][0][0].isalpha()
+            ):
                 objeto = Identifier(
                     tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1]
                 )
                 tokenClasificado.append(objeto)
             else:
-                
-                objeto = Error(
-                    tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1]
-                )
+                objeto = Error(tokensFinales[i][j][0], i + 1, tokensFinales[i][j][1])
                 tokenClasificado.append(objeto)
                 return tokenClasificado
     return tokenClasificado
@@ -482,12 +503,12 @@ def clasificadorDeTokens(tokensFinales):
 
 def main():
     try:
-        path = sys.argv[1] # input("Ingrese el nombre del archivo: ")
+        path = sys.argv[1]  # input("Ingrese el nombre del archivo: ")
         texto = read_file(path)
     except Exception:
-        print(f"Error al leer el archivo")
+        print("Error al leer el archivo")
         exit(0)
-        
+
     tokens = generadorTokensSinProcesar(texto)
     salida = clasificadorDeTokens(tokens)
 
@@ -499,5 +520,4 @@ def main():
 
 
 if __name__ == "__main__":
-    
     main()
