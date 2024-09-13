@@ -2,7 +2,7 @@
 imaginario = 2+a3uan
 2 abcd j
 j = holaaa
-2j
+2j test
 abd123 """
 Como estaaa
 La
@@ -10,7 +10,7 @@ People
 """ abc "hola"
 holaquetal3 '''
 Otro docstring de prueba con
-single quote """ ''' 2654.77+4j uan
+single quote """ ''' 2654.77+466.333j uan
 123.5 j
 ""hola3""
 string = "hola"+"a"

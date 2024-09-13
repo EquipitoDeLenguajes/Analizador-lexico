@@ -325,8 +325,8 @@ def scannerFunction(cadena, i=0):
                             break
                 if "j" in subcadena_siguiente:
                     subcadena_actual += cadena[i] + subcadena_siguiente
-                    textoEscaneado.append([subcadena_actual, k])
-                    i += len(subcadena_actual)
+                    textoEscaneado.append([subcadena_actual, k + 2 - len(subcadena_actual)])
+                    i += len(subcadena_siguiente) + 1
                     subcadena_actual = ""
                     found_special = True
             for j in range(3, 0, -1):
